@@ -1,0 +1,16 @@
+plugins { id "application"; id "com.github.johnrengelman.shadow" version "8.1.1" }
+
+dependencies {
+    implementation project(":core")
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+}
+
+apply from: "distribute.gradle"
+
+application { mainClass = "com.github.znemux.game.DesktopLauncher" }
+
+distTar.enabled = false
+distZip.enabled = false
+shadowDistTar.enabled = false
+shadowDistZip.enabled = false

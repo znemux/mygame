@@ -1,0 +1,72 @@
+def osName = System.getProperty("os.name").toLowerCase().split(" ")[0]
+def userHome = System.getProperty("user.home")
+
+def distDir = new File("${buildDir}/distcache")
+distDir.mkdirs()
+
+def jarName = appName + "-" + version + ".jar"
+
+shadowJar {
+    manifest { attributes "Main-Class": application.mainClass }
+    destinationDirectory = layout.buildDirectory.dir("distributions")
+    archiveFileName.set(jarName)
+    exclude("sfd.ser", "**/*.sha1", "**/*.git", "META-INF/native-image/**", "META-INF/maven/**", "META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+    minimize()
+    doLast { file(archiveFile).setExecutable(true, false) }
+}
+
+task copyJar(type: Copy) {
+    dependsOn "shadowJar"
+
+    from "${buildDir}/distributions/${jarName}" // Path to the source file
+    into "${buildDir}/distcache/game" // Path to the destination directory
+}
+
+task createScriptBash {
+    def text = "#!/bin/sh\n"+
+    "SDIR=\$(dirname \$(readlink -f '\$0')) && cd '\$SDIR/game' && chmod +x ../runtime/linux/bin/java\n"+
+    "../runtime/linux/bin/java -jar ${jarName} || java -jar ${jarName}"
+    def outputFile = file("${buildDir}/distcache/${appName}.sh")
+    outputFile.write(text)
+}
+
+task createScriptBatch {
+    def text = "cd game\n"+
+    "..\\runtime\\windows\\bin\\java -jar ${jarName}\n"+
+    "IF %ERRORLEVEL% NEQ 0 (\n"+
+    "    java -jar ${jarName}\n)"
+    def outputFile = file("${buildDir}/distcache/${appName}.bat")
+    outputFile.write(text)
+}
+
+task createScripts {
+    dependsOn "createScriptBash", "createScriptBatch", "copyJar"
+}
+
+task addPlatforms(type: Copy) {
+    dependsOn "createScripts"
+    if (osName.equals("windows")) {
+        from "${userHome}/AppData/JREs"
+        into "${buildDir}/distcache/runtime"
+    } else {
+        from "${userHome}/.JREs"
+        into "${buildDir}/distcache/runtime"
+    }
+}
+
+task createJRE(type: Exec) {
+    dependsOn "addPlatforms"
+    commandLine "jlink", "--add-modules", "jdk.unsupported", "--no-header-files", "--strip-debug",
+    "--no-man-pages", "--compress", "1", "--output", "${buildDir}/distcache/runtime/"+osName
+}
+
+task zipDist(type: Zip) {
+    dependsOn "createJRE"
+    archiveFileName = "${appName}-${version}-${project.name}.zip"
+    destinationDirectory = file("${buildDir}/distributions")
+    from "${buildDir}/distcache"
+}
+
+task dist {
+    dependsOn "zipDist"
+}

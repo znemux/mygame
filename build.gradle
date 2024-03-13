@@ -1,0 +1,17 @@
+plugins {
+    id "java"
+}
+
+configure(subprojects) {
+    apply plugin: "java"
+    apply plugin: "java-library"
+}
+
+subprojects {
+    version = "0.1"
+    ext.appName = "MyGame"
+    repositories { mavenCentral() }
+    java { sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17 }
+}
+
+
