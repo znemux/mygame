@@ -4,7 +4,7 @@ def userHome = System.getProperty("user.home")
 def distDir = new File("${buildDir}/distcache")
 distDir.mkdirs()
 
-def jarName = appName + "-" + version + ".jar"
+def jarName = appName + ".jar"
 
 shadowJar {
     manifest { attributes "Main-Class": application.mainClass }
@@ -17,7 +17,6 @@ shadowJar {
 
 task copyJar(type: Copy) {
     dependsOn "shadowJar"
-
     from "${buildDir}/distributions/${jarName}" // Path to the source file
     into "${buildDir}/distcache/game" // Path to the destination directory
 }
@@ -62,7 +61,7 @@ task createJRE(type: Exec) {
 
 task zipDist(type: Zip) {
     dependsOn "createJRE"
-    archiveFileName = "${appName}-${version}-${project.name}.zip"
+    archiveFileName = "${appName}-${project.name}-${version}.zip"
     destinationDirectory = file("${buildDir}/distributions")
     from "${buildDir}/distcache"
 }

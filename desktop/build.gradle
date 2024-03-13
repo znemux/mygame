@@ -6,6 +6,13 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 }
 
+def osName = System.getProperty("os.name").toLowerCase()
+
+run {
+    setIgnoreExitValue(true)
+    if (osName.contains('mac')) jvmArgs += "-XstartOnFirstThread"
+}
+
 apply from: "distribute.gradle"
 
 application { mainClass = "com.github.znemux.game.DesktopLauncher" }

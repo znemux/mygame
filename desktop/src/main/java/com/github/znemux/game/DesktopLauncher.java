@@ -19,7 +19,7 @@ public class DesktopLauncher {
         configuration.useVsync(true);
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate);
         configuration.setWindowedMode(640, 480);
-        // configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
+        configuration.setWindowIcon("asset/desktop/w128.png", "asset/desktop/w64.png", "asset/desktop/w32.png", "asset/desktop/w16.png");
         return configuration;
     }
     
